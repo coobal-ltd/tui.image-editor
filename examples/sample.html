@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>listing directory /</title>
+    </head>
+    <body>
+        <canvas id="mainCanvas" width="450" height="431"></canvas>
+        <br>
+        <img id="asd" width="450" height="431">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.0/fabric.js"></script>
+        <script>
+function blurSelection(img, left=0, top=0) {
+  img.cropX = left;
+  img.cropY = top;
+  img.width *= img.scaleX;
+  img.height *= img.scaleY;
+  img.scaleX = 1;
+  img.scaleY = 1;    
+  fabricCanvas.renderAll();
+}
+
+function copyCanvas() {
+  const blurredImage = new fabric.Image(copiedCanvas, { });
+
+  const filter = new fabric.Image.filters.Blur({
+    blur: 0.9
+  });
+  blurredImage.filters.push(filter);
+  blurredImage.applyFilters();
+
+  blurredImage.cropX = 0;
+  blurredImage.cropY = 0;
+  blurredImage.width = 300;
+  blurredImage.height = 150;
+  blurredImage.objectCaching = false;
+
+  fabricCanvas.add(blurredImage);
+  blurredImage.bringToFront();
+
+  blurredImage.on('moving', function (options) {
+    const newLeft = options.target.left;
+    const newTop = options.target.top;
+    blurSelection(blurredImage, newLeft, newTop);
+  });
+  
+  blurredImage.on('scaling', function (options) {
+    const newLeft = options.target.left;
+    const newTop = options.target.top;
+    blurSelection(blurredImage, newLeft, newTop);
+  }) 
+
+  blurSelection(blurredImage, 0, 0);
+}
+
+var fabricCanvas = new fabric.Canvas("mainCanvas", {
+  preserveObjectStacking: true
+});
+
+
+var copiedCanvas = null;
+
+
+fabric.Image.fromURL("http://localhost:8080/examples/img/bg.jpg", function (img) {
+// fabric.util.loadImage("http://localhost:8080/examples/img/bg.jpg", function (img) {
+    // img.set({
+    //     width: 200,
+    //     height: 200,
+    // });
+    //fabricCanvas.add(img);
+    fabricCanvas.sendToBack(img);
+    copiedCanvas = fabricCanvas.toCanvasElement();
+
+    const blurredImage = new fabric.Image(copiedCanvas, { });
+    const filter = new fabric.Image.filters.Pixelate({
+        blocksize: 10
+    });
+    blurredImage.filters.push(filter);
+    blurredImage.applyFilters();
+
+    fabricCanvas.renderAll();
+    // copyCanvas();
+
+    console.log('IMG',blurredImage.getElement());
+    /*
+    new fabric.Pattern({
+        source: blurredImage.getElement(),
+        repeat: 'no-repeat'
+    })
+    */
+
+    const instance = new fabric.Ellipse({
+        type: 'circle',
+        left: 0,
+        top: 0,
+        stroke: '#000000',
+        fill: new fabric.Pattern({
+            source: function() {
+                console.log('mm');
+                blurredImage.scaleX = 1;
+                blurredImage.scaleY = 1;
+
+                return blurredImage.getElement();
+              /*
+              patternSourceCanvas.setDimensions({
+                width: img.getScaledWidth() + padding,
+                height: img.getScaledHeight() + padding
+              });
+              patternSourceCanvas.renderAll();
+              return patternSourceCanvas.getElement();
+              */
+            },
+            repeat: 'no-repeat'
+        }),
+        strokeWidth: 1,
+        originX: 'left',
+        originY: 'top',
+        rx: 100,
+        ry: 100 
+    });
+    fabricCanvas.add(instance);
+
+    instance.on('scaling', function (options) {
+        /*
+        console.log('jj');
+      const newLeft = options.target.left;
+      const newTop = options.target.top;
+      blurredImage.scaleX = 1;
+      blurredImage.scaleY = 1;    
+      instance.fill = new fabric.Pattern({
+        source: blurredImage.getElement(),
+        repeat: 'no-repeat'
+      });
+      */
+      fabricCanvas.requestRenderAll();
+
+      
+    }) 
+
+
+}.bind(this), {
+  crossOrigin: 'anonymous'
+});
+
+/*
+canvas.renderAll();
+*/
+
+        </script>
+    </body>
+</html>
+
