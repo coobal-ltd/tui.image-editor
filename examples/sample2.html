@@ -11,6 +11,12 @@ var clipPath = new fabric.Circle({
 });
 
 function job(instance, blurredImage) {
+  instance.width *= instance.scaleX;
+  instance.height *= instance.scaleY;
+
+  instance.scaleX = 1;
+  instance.scaleY = 1;
+
   const as = getRotatedLeft(instance);
   const diffLeft = (as.width - instance.width) / 2;
   const diffTop = (as.height - instance.height) / 2;
@@ -28,13 +34,15 @@ function job(instance, blurredImage) {
     cropY: cropY - diffTop
   });
   adjustOriginPosition(blurredImage, 'start'); //left, top
+
+  bg.renderAll();
 }
 
 function getRotatedLeft(instance) {
-    const {x: ax, y: ay} = instance.getPointByOrigin('left', 'top');
-    const {x: bx, y: by} = instance.getPointByOrigin('right', 'top');
-    const {x: cx, y: cy} = instance.getPointByOrigin('left', 'bottom');
-    const {x: dx, y: dy} = instance.getPointByOrigin('right', 'bottom');
+    let {x: ax, y: ay} = instance.getPointByOrigin('left', 'top');
+    let {x: bx, y: by} = instance.getPointByOrigin('right', 'top');
+    let {x: cx, y: cy} = instance.getPointByOrigin('left', 'bottom');
+    let {x: dx, y: dy} = instance.getPointByOrigin('right', 'bottom');
 
     const left = Math.min(ax, bx, cx, dx);
     const top = Math.min(ay, by, cy, dy);
@@ -50,7 +58,6 @@ function getRotatedLeft(instance) {
 }
 
 function makeInstance(copiedCanvas, left, top) {
-
     let blurredImage = new fabric.Image(copiedCanvas);
 
     let patternSourceCanvas = new fabric.StaticCanvas();
@@ -98,17 +105,22 @@ function makeInstance(copiedCanvas, left, top) {
       cropX: instance.left - (instance.width / 2),
       cropY: instance.top - (instance.height / 2),
     });
+    instance.set({
+        blurredImage
+    })
 
     instance.on('rotating', (aa) => {
         job(instance, blurredImage);
     });
 
     instance.on('scaling', (aa) => {
+        /*
       instance.width *= instance.scaleX;
       instance.height *= instance.scaleY;
-
       instance.scaleX = 1;
       instance.scaleY = 1;
+      */
+        console.log('scaling', instance);
 
       job(instance, blurredImage);
     });
@@ -153,27 +165,35 @@ fabric.Image.fromURL("http://localhost:8080/examples/img/bg.jpg", function (img)
 
 
 });
+bg.on('selection:updated', function (ss) {
+    console.log('UPDATED - ', ss);
+});
+
 /*
-bg.on('object:modified', function (ss) {
-    console.log('MODIFIED');
-    console.log('OR', ss.target.type);
-    if (ss.target.type === 'activeSelection') {
-        ss.target.getObjects()
-    } else {
+bg.on('selection:cleared', function (ss) {
+    console.log('selection:cleared', ss.deselected);
+    if (ss.deselected.length > 0) {
+        ss.deselected.forEach((item => {
+            job(item, item.blurredImage);
+        }));
     }
-    
 });
 */
 
-/*
-canvas.setBackgroundImage('http://fabricjs.com/assets/jail_cell_bars.png', canvas.renderAll.bind(canvas), {
-    backgroundImageOpacity: 0.5,
-    backgroundImageStretch: false
+bg.on('object:modified', function (ss) {
+    if (ss.target.type === 'activeSelection') {
+        const aa = bg.getObjects();
+        const angle = ss.target.angle;
+        const left = ss.target.left;
+        const top = ss.target.top;
+        
+        aa.forEach((item => {
+            ss.target.removeWithUpdate(item);
+            job(item, item.blurredImage);
+            ss.target.addWithUpdate(item);
+        }));
+        // bg.renderAll(); 
+    }
 });
-
-canvas.clipTo = function(ctx) {
-    ctx.rect(100,100,100,100);
-}
-*/
 
 </script>
