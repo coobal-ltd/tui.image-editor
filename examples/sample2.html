@@ -110,7 +110,7 @@ function makeInstance(copiedCanvas, left, top) {
     })
 
     instance.on('rotating', (aa) => {
-        job(instance, blurredImage);
+        // job(instance, blurredImage);
     });
 
     instance.on('scaling', (aa) => {
@@ -165,21 +165,28 @@ fabric.Image.fromURL("http://localhost:8080/examples/img/bg.jpg", function (img)
 
 
 });
-bg.on('selection:updated', function (ss) {
-    console.log('UPDATED - ', ss);
+
+bg.on('object:scaling', function (ss) {
+    const target = ss.target;
+    const angle = ss.target.angle;
+    const objects = ss.target.getObjects();
+    const sampleObject = objects[0];
+
+    sampleObject.blurredImage.width *= target.scaleX;
+    sampleObject.blurredImage.height *= target.scaleY;
+
+    console.log('SAMPLEOBJECT', sampleObject.blurredImage.cropX);
 });
 
-/*
 bg.on('selection:cleared', function (ss) {
-    console.log('selection:cleared', ss.deselected);
     if (ss.deselected.length > 0) {
         ss.deselected.forEach((item => {
             job(item, item.blurredImage);
         }));
     }
 });
-*/
 
+/*
 bg.on('object:modified', function (ss) {
     if (ss.target.type === 'activeSelection') {
         const aa = bg.getObjects();
@@ -195,5 +202,6 @@ bg.on('object:modified', function (ss) {
         // bg.renderAll(); 
     }
 });
+*/
 
 </script>
