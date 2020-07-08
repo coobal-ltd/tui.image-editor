@@ -7,7 +7,7 @@
   "//": "Coobal独自カスタムが入るので，npmには公開できません",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nhn/tui.image-editor.git"
+    "url": "https://github.com/coobal-ltd/tui.image-editor.git"
   },
   "main": "dist/tui-image-editor.js",
   "files": [
