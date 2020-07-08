@@ -82,9 +82,24 @@ function setConfig(defaultConfig, server) {
             suite: ''
         };
     } else {
+        /**
+         * WSL を利用する場合，
+         * WindowsOS 環境変数 PATHに chrome.exeのインストール場所までのパスを追加すること．wslでchrome.exeが実行できるかを確認しておくこと．
+         * npm run test もしくは karma start する前に以下の環境変数を定義しておくこと．
+         * WSLからChrome for Windows（chrome.exe）を実行してテストする場合は，テスト結果出力ディレクトリをWindowsベースのパスにすること．
+         * Windowsシステムが/mnt/c/を認識できないためです．
+         * export CHROME_BIN = chrome.exe
+         * export TEMP = 'c:\\tmp\\'
+         */
         defaultConfig.browsers = [
             'ChromeHeadless'
         ];
+        defaultConfig.flags = [
+            '--disable-web-security',
+            '--disable-gpu',
+            '--no-sandbox',
+            '--headless'
+        ]
     }
 }
 

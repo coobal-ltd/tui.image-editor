@@ -567,6 +567,19 @@ export default class ImageTracer {
         return layer;
     }
 
+    // Point in polygon test
+    pointinpoly(p, pa) {
+        let isin=false;
+
+        for(var i = 0,j = pa.length-1; i<pa.length; j = i++){
+            isin =
+                ( ((pa[i].y > p.y) !== (pa[j].y > p.y)) && (p.x < (pa[j].x - pa[i].x) * (p.y - pa[i].y) / (pa[j].y - pa[i].y) + pa[i].x) )
+                ? !isin : isin;
+        }
+
+        return isin;
+    }
+
     pathscan(arr, pathomit) {
         const paths = [];
         let pacnt = 0;
@@ -628,7 +641,8 @@ export default class ImageTracer {
                                     for (let parentcnt = 0; parentcnt < pacnt; parentcnt++) {
                                         if ((!paths[parentcnt].isholepath) &&
                                             this.boundingboxincludes(paths[parentcnt].boundingbox, paths[pacnt].boundingbox) &&
-                                            this.boundingboxincludes(parentbbox, paths[parentcnt].boundingbox)
+                                            this.boundingboxincludes(parentbbox, paths[parentcnt].boundingbox) &&
+                                            this.pointinpoly( paths[pacnt].points[0], paths[parentcnt].points )
                                         ) {
                                             parentidx = parentcnt;
                                             parentbbox = paths[parentcnt].boundingbox;
@@ -905,9 +919,14 @@ export default class ImageTracer {
         return btbis;
     }
 
-    roundtodec(val, places) {
-        return Number(val.toFixed(places));
-    }
+    ////////////////////////////////////////////////////////////
+    //
+    //  SVG Drawing functions
+    //
+    ////////////////////////////////////////////////////////////
+
+    // Rounding to given decimals https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-in-javascript
+    roundtodec(val,places) { return  + val.toFixed(places); }
 
     svgpathstring(tracedata, lnum, pathnum, options) {
         let layer = tracedata.layers[lnum], smp = layer[pathnum], str = '', pcnt;
