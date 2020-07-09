@@ -55,7 +55,7 @@ export default class ImageTracer {
     }
     /* eslint-disable */
     constructor() {
-        this.versionnumber = '1.2.4';
+        this.versionnumber = '1.2.6';
         this.optionpresets = {
             default: {
                 corsenabled: false,
